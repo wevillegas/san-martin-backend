@@ -20,6 +20,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Todas las rutas de jugadores empezarán con /api/jugadores
 app.use('/api/jugadores', require('./routes/jugadorRoutes'));
 app.use('/api/noticias', require('./routes/noticiaRoutes'));
+app.use('/api/auth', require('./routes/authRoutes'));
 
 // Ruta de cortesía para verificar que el servidor está en línea
 app.get('/', (req, res) => {
