@@ -9,6 +9,7 @@ const JugadorSchema = new mongoose.Schema({
         required: true,
         enum: ['Arquero', 'Defensor', 'Volante', 'Delantero'] // (Usa las que tengas definidas)
     },
+    imagenUrl: { type: String }, // <-- Agregamos esto
     // NUEVOS CAMPOS AGREGADOS:
     fechaNacimiento: { type: Date },
     lugarNacimiento: { type: String },

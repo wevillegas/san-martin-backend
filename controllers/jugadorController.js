@@ -19,6 +19,11 @@ exports.crearJugador = async (req, res) => {
             });
         }
 
+
+        if (req.file) {
+            req.body.imagenUrl = req.file.path;
+        }
+
         // Si no existe esa combinación exacta, lo creamos
         const nuevoJugador = new Jugador(req.body);
         await nuevoJugador.save();
@@ -72,25 +77,27 @@ exports.obtenerJugadorPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - IMPORTANTE: activar validadores
 exports.actualizarJugador = async (req, res) => {
     try {
-        // { new: true } devuelve el nuevo objeto
-        // { runValidators: true } obliga a Mongoose a chequear el enum de posición
+        // 1. EL PASO QUE FALTABA: Si el portero subió una imagen nueva, guardamos su URL
+        if (req.file) {
+            req.body.imagenUrl = req.file.path;
+        }
+
+        // 2. Actualizamos el jugador en la base de datos
         const jugadorActualizado = await Jugador.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { new: true, runValidators: true }
+            // 3. FIX DEL WARNING: Cambiamos { new: true } por esto:
+            { returnDocument: 'after' }
         );
 
         if (!jugadorActualizado) {
-            return res.status(404).json({ mensaje: 'Jugador no encontrado para actualizar' });
+            return res.status(404).json({ mensaje: 'Jugador no encontrado' });
         }
 
-        res.json({ mensaje: 'Datos actualizados correctamente', jugador: jugadorActualizado });
+        res.json(jugadorActualizado);
     } catch (error) {
-        console.error('Error al actualizar jugador:', error);
-        if (error.name === 'ValidationError') {
-            return res.status(400).json({ mensaje: 'Error de validación', error: error.message });
-        }
-        res.status(500).json({ mensaje: 'Hubo un error al actualizar' });
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al actualizar el jugador' });
     }
 };
 
