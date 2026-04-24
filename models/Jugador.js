@@ -1,32 +1,22 @@
 const mongoose = require('mongoose');
 
-// Definimos el "molde" para nuestros jugadores
-const jugadorSchema = new mongoose.Schema({
-    nombre: { 
-        type: String, 
-        required: [true, 'El nombre es obligatorio'],
-        trim: true
+const JugadorSchema = new mongoose.Schema({
+    nombre: { type: String, required: true },
+    apellido: { type: String, required: true },
+    numeroCamiseta: { type: Number, required: true },
+    posicion: {
+        type: String,
+        required: true,
+        enum: ['Arquero', 'Defensor', 'Volante', 'Delantero'] // (Usa las que tengas definidas)
     },
-    apellido: { 
-        type: String, 
-        required: [true, 'El apellido es obligatorio'],
-        trim: true
-    },
-    posicion: { 
-        type: String, 
-        required: [true, 'La posición es obligatoria'],
-        enum: ['Arquero', 'Defensor', 'Mediocampista', 'Delantero'] // Solo permite estos valores
-    },
-    numeroCamiseta: { 
-        type: Number 
-    },
-    imagen: { 
-        type: String, 
-        default: 'https://via.placeholder.com/150' // Una imagen por defecto por si no subimos foto
-    }
+    // NUEVOS CAMPOS AGREGADOS:
+    fechaNacimiento: { type: Date },
+    lugarNacimiento: { type: String },
+    altura: { type: Number }, // Lo guardamos como número (ej: 1.88) para poder hacer estadísticas después si querés
+    procedencia: { type: String },
+    debutEnClub: { type: String }
 }, {
-    timestamps: true // Esto agrega automáticamente la fecha de creación y de actualización
+    timestamps: true
 });
 
-// Exportamos el modelo para poder usarlo en otras partes del código
-module.exports = mongoose.model('Jugador', jugadorSchema);
+module.exports = mongoose.model('Jugador', JugadorSchema);

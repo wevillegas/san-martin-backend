@@ -20,7 +20,7 @@ const noticiaSchema = new mongoose.Schema({
     },
     etiqueta: {
         type: String,
-        enum: ['Primera Nacional', 'Institucional', 'Reserva', 'Femenino', 'Socios'],
+        enum: ['Primera Nacional', 'Institucional', 'Liga Tucumana', 'Femenino', 'Socios', 'Primer Equipo', 'Juveniles'],
         default: 'Primera Nacional'
     }
 }, {
