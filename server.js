@@ -21,6 +21,8 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/jugadores', require('./routes/jugadorRoutes'));
 app.use('/api/noticias', require('./routes/noticiaRoutes'));
 app.use('/api/auth', require('./routes/authRoutes'));
+// Asegurate de poner la ruta correcta hacia el archivo
+app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
 
 // Ruta de cortesía para verificar que el servidor está en línea
 app.get('/', (req, res) => {

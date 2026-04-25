@@ -3,11 +3,16 @@ const Noticia = require('../models/Noticia');
 // 1. CREAR (POST) - Publicar una nueva noticia
 exports.crearNoticia = async (req, res) => {
     try {
+        // Si el portero subió una imagen, atrapamos la URL de Cloudinary
+        if (req.file) {
+            req.body.imagenUrl = req.file.path;
+        }
+
         const nuevaNoticia = new Noticia(req.body);
         await nuevaNoticia.save();
-        res.status(201).json({ 
-            mensaje: '¡Noticia publicada con éxito!', 
-            noticia: nuevaNoticia 
+        res.status(201).json({
+            mensaje: '¡Noticia publicada con éxito!',
+            noticia: nuevaNoticia
         });
     } catch (error) {
         console.error('Error al crear noticia:', error);
@@ -19,7 +24,7 @@ exports.crearNoticia = async (req, res) => {
 exports.obtenerNoticias = async (req, res) => {
     try {
         // Buscamos todas y las ordenamos por fecha de creación (de más nueva a más vieja)
-        const noticias = await Noticia.find().sort({ createdAt: -1 }); 
+        const noticias = await Noticia.find().sort({ createdAt: -1 });
         res.json(noticias);
     } catch (error) {
         console.error('Error al obtener noticias:', error);
@@ -31,11 +36,11 @@ exports.obtenerNoticias = async (req, res) => {
 exports.obtenerNoticiaPorId = async (req, res) => {
     try {
         const noticia = await Noticia.findById(req.params.id);
-        
+
         if (!noticia) {
             return res.status(404).json({ mensaje: 'Noticia no encontrada' });
         }
-        
+
         res.json(noticia);
     } catch (error) {
         console.error('Error al obtener la noticia:', error);
@@ -46,10 +51,15 @@ exports.obtenerNoticiaPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - Para editar un error o agregar info a una noticia
 exports.actualizarNoticia = async (req, res) => {
     try {
+        // Si hay foto nueva, pisamos la URL anterior
+        if (req.file) {
+            req.body.imagenUrl = req.file.path;
+        }
+
         const noticiaActualizada = await Noticia.findByIdAndUpdate(
-            req.params.id, 
-            req.body, 
-            { new: true } 
+            req.params.id,
+            req.body,
+            { returnDocument: 'after' } // Fix del warning de Mongoose
         );
 
         if (!noticiaActualizada) {

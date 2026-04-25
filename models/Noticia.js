@@ -6,13 +6,17 @@ const noticiaSchema = new mongoose.Schema({
         required: [true, 'El título de la noticia es obligatorio'],
         trim: true
     },
+    resumen: {
+        type: String,
+        required: [true, 'El resumen es obligatorio para las tarjetas del inicio'],
+        trim: true
+    },
     cuerpo: {
         type: String,
         required: [true, 'El cuerpo de la noticia no puede estar vacío']
     },
-    imagen: {
-        type: String,
-        default: 'https://via.placeholder.com/600x400' // Imagen por defecto para la portada
+    imagenUrl: {
+        type: String
     },
     autor: {
         type: String,
