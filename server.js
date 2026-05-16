@@ -24,6 +24,17 @@ app.use('/api/auth', require('./routes/authRoutes'));
 // Asegurate de poner la ruta correcta hacia el archivo
 app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
 
+// ... tus otros middlewares y rutas ...
+
+app.use('/api/jugadores', require('./routes/jugadorRoutes'));
+app.use('/api/noticias', require('./routes/noticiaRoutes'));
+app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
+
+// AGREGÁ ESTA LÍNEA ESPECÍFICA ACÁ:
+app.use('/api/productos', require('./routes/productoRoutes'));
+
+// ... el resto de tu server.js (app.listen, etc.) ...
+
 // Ruta de cortesía para verificar que el servidor está en línea
 app.get('/', (req, res) => {
     res.send('Servidor del Club Atlético San Martín de Tucumán - Online');
