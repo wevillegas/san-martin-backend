@@ -26,9 +26,13 @@ const noticiaSchema = new mongoose.Schema({
         type: String,
         enum: ['Primera Nacional', 'Institucional', 'Liga Tucumana', 'Femenino', 'Socios', 'Primer Equipo', 'Juveniles'],
         default: 'Primera Nacional'
+    },
+    destacado: {
+        type: Boolean,
+        default: false // Por defecto, una noticia nueva no es destacada
     }
 }, {
-    timestamps: true // Fundamental para las noticias: nos da fecha y hora de publicación automática
+    timestamps: true
 });
 
 module.exports = mongoose.model('Noticia', noticiaSchema);

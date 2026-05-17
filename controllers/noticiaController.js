@@ -3,7 +3,6 @@ const Noticia = require('../models/Noticia');
 // 1. CREAR (POST) - Publicar una nueva noticia
 exports.crearNoticia = async (req, res) => {
     try {
-        // Si el portero subió una imagen, atrapamos la URL de Cloudinary
         if (req.file) {
             req.body.imagenUrl = req.file.path;
         }
@@ -23,8 +22,8 @@ exports.crearNoticia = async (req, res) => {
 // 2. LEER TODAS (GET) - Feed de noticias para el Home
 exports.obtenerNoticias = async (req, res) => {
     try {
-        // Buscamos todas y las ordenamos por fecha de creación (de más nueva a más vieja)
-        const noticias = await Noticia.find().sort({ createdAt: -1 });
+        // LA MAGIA ACÁ: Ordenamos por 'destacado' (descendente: true primero) y luego por 'createdAt' (las más nuevas primero)
+        const noticias = await Noticia.find().sort({ destacado: -1, createdAt: -1 });
         res.json(noticias);
     } catch (error) {
         console.error('Error al obtener noticias:', error);
@@ -51,7 +50,6 @@ exports.obtenerNoticiaPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - Para editar un error o agregar info a una noticia
 exports.actualizarNoticia = async (req, res) => {
     try {
-        // Si hay foto nueva, pisamos la URL anterior
         if (req.file) {
             req.body.imagenUrl = req.file.path;
         }
@@ -59,7 +57,7 @@ exports.actualizarNoticia = async (req, res) => {
         const noticiaActualizada = await Noticia.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { returnDocument: 'after' } // Fix del warning de Mongoose
+            { returnDocument: 'after' }
         );
 
         if (!noticiaActualizada) {
