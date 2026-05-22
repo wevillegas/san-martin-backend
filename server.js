@@ -6,36 +6,26 @@ require('dotenv').config();
 const app = express();
 
 // Middlewares
-// CORS permite que el frontend (React) se comunique con el backend sin bloqueos de seguridad
 app.use(cors());
-// Permite que el servidor entienda y procese datos en formato JSON
 app.use(express.json());
 
-// Conexión a MongoDB Atlas usando la URI de las variables de entorno
+// Conexión a MongoDB
 mongoose.connect(process.env.MONGO_URI)
     .then(() => console.log('¡Conectado a la base de datos de MongoDB!'))
     .catch((error) => console.error('Error conectando a MongoDB:', error));
 
-// Definición de Rutas
-// Todas las rutas de jugadores empezarán con /api/jugadores
-app.use('/api/jugadores', require('./routes/jugadorRoutes'));
-app.use('/api/noticias', require('./routes/noticiaRoutes'));
+// Definición de Rutas (Limpias y ordenadas)
 app.use('/api/auth', require('./routes/authRoutes'));
-// Asegurate de poner la ruta correcta hacia el archivo
-app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
-
-// ... tus otros middlewares y rutas ...
-
 app.use('/api/jugadores', require('./routes/jugadorRoutes'));
 app.use('/api/noticias', require('./routes/noticiaRoutes'));
 app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
-
-// AGREGÁ ESTA LÍNEA ESPECÍFICA ACÁ:
 app.use('/api/productos', require('./routes/productoRoutes'));
 
-// ... el resto de tu server.js (app.listen, etc.) ...
+// ---> ACÁ AGREGAMOS LA NUEVA RUTA DEL FIXTURE <---
+app.use('/api/fixture', require('./routes/fixtureRoutes'));
 
-// Ruta de cortesía para verificar que el servidor está en línea
+
+// Ruta de cortesía
 app.get('/', (req, res) => {
     res.send('Servidor del Club Atlético San Martín de Tucumán - Online');
 });
