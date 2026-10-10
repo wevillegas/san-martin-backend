@@ -6,7 +6,7 @@ exports.crearProducto = async (req, res) => {
         const { nombre } = req.body;
 
         // Buscamos si ya existe un producto con el mismo nombre
-        const productoExistente = await Producto.findOne({ nombre: nombre });
+        const productoExistente = await Producto.findOne({ nombre: String(nombre) });
 
         if (productoExistente) {
             return res.status(400).json({
@@ -78,7 +78,7 @@ exports.actualizarProducto = async (req, res) => {
         const productoActualizado = await Producto.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { returnDocument: 'after' }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!productoActualizado) {

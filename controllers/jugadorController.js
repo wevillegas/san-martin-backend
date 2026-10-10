@@ -8,9 +8,9 @@ exports.crearJugador = async (req, res) => {
 
         // Buscamos si existe UN registro que coincida en los 3 campos a la vez
         const jugadorIdentico = await Jugador.findOne({
-            nombre: nombre,
-            apellido: apellido,
-            numeroCamiseta: numeroCamiseta
+            nombre: String(nombre),
+            apellido: String(apellido),
+            numeroCamiseta: Number(numeroCamiseta)
         });
 
         if (jugadorIdentico) {
@@ -87,7 +87,7 @@ exports.actualizarJugador = async (req, res) => {
             req.params.id,
             req.body,
             // 3. FIX DEL WARNING: Cambiamos { new: true } por esto:
-            { returnDocument: 'after' }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!jugadorActualizado) {

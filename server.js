@@ -54,6 +54,14 @@ app.get('/', (req, res) => {
     res.send('Servidor del Club Atlético San Martín de Tucumán - Online');
 });
 
+// Manejador de errores de Multer (ej. imagen que supera el límite de tamaño)
+app.use((error, req, res, next) => {
+    if (error && error.name === 'MulterError') {
+        return res.status(400).json({ mensaje: 'Error al subir el archivo: ' + error.message });
+    }
+    next(error);
+});
+
 // ==========================================
 //         CONFIGURACIÓN DEL PUERTO
 // ==========================================
