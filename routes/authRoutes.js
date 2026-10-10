@@ -1,16 +1,22 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authController = require('../controllers/authController');
-
-// 1. Importamos el middleware de seguridad (ajustá la ruta si tu archivo se llama distinto)
 const authMiddleware = require('../middleware/authMiddleware');
 
+// Limita los intentos de login para frenar fuerza bruta de contraseña
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutos
+    max: 5, // 5 intentos por IP en la ventana
+    message: { mensaje: "Demasiados intentos de inicio de sesión. Intenta de nuevo en 15 minutos." },
+    skipSuccessfulRequests: true // Un login correcto no cuenta contra el límite
+});
+
 // Ruta para Registrar (POST) -> /api/auth/register
-// 2. Metemos el authMiddleware en el medio. Ahora exige token sí o sí.
+// Protegida: solo un admin ya logueado puede crear otro admin
 router.post('/register', authMiddleware, authController.registrarUsuario);
 
 // Ruta para Iniciar Sesión (POST) -> /api/auth/login
-// Esta queda 100% pública para poder entrar.
-router.post('/login', authController.loginUsuario);
+router.post('/login', loginLimiter, authController.loginUsuario);
 
 module.exports = router;

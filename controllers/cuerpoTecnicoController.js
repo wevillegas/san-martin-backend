@@ -47,7 +47,7 @@ exports.actualizarMiembro = async (req, res) => {
         const miembroActualizado = await CuerpoTecnico.findByIdAndUpdate(
             req.params.id, 
             req.body, 
-            { returnDocument: 'after' }
+            { returnDocument: 'after', runValidators: true }
         );
         if (!miembroActualizado) return res.status(404).json({ mensaje: 'Miembro no encontrado' });
         res.json(miembroActualizado);

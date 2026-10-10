@@ -57,7 +57,7 @@ exports.actualizarNoticia = async (req, res) => {
         const noticiaActualizada = await Noticia.findByIdAndUpdate(
             req.params.id,
             req.body,
-            { returnDocument: 'after' }
+            { returnDocument: 'after', runValidators: true }
         );
 
         if (!noticiaActualizada) {
