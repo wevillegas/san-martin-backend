@@ -1,4 +1,5 @@
 const Usuario = require('../models/Usuario');
+const Auditoria = require('../models/Auditoria');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -40,6 +41,10 @@ exports.loginUsuario = async (req, res) => {
         if (!passwordCorrecto) {
             return res.status(400).json({ mensaje: 'Credenciales inválidas (contraseña incorrecta)' });
         }
+
+        // Auditoría: queda registrado quién inició sesión
+        Auditoria.create({ usuarioId: usuario._id, usuarioNombre: usuario.nombre, usuarioEmail: usuario.email, accion: 'login', entidad: 'auth' })
+            .catch((e) => console.error('No se pudo registrar el login:', e.message));
 
         // 3. Si todo está bien, creamos el Token (Pase VIP)
         const payload = {

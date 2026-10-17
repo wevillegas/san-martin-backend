@@ -42,12 +42,14 @@ mongoose.connect(process.env.MONGO_URI)
 // ==========================================
 //           DEFINICIÓN DE RUTAS
 // ==========================================
+app.use('/api', require('./middleware/auditoria')); // registra quién modifica qué
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/jugadores', require('./routes/jugadorRoutes'));
 app.use('/api/noticias', require('./routes/noticiaRoutes'));
 app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
 app.use('/api/productos', require('./routes/productoRoutes'));
 app.use('/api/fixture', require('./routes/fixtureRoutes'));
+app.use('/api/auditoria', require('./routes/auditoriaRoutes'));
 
 // Ruta de cortesía para verificación de estado
 app.get('/', (req, res) => {
