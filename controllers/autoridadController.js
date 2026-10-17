@@ -1,4 +1,5 @@
 const Autoridad = require('../models/Autoridad');
+const { describirError } = require('../utils/errores');
 
 // GET /api/autoridades (público) -> en el orden definido en el panel
 exports.obtener = async (req, res) => {
@@ -18,6 +19,8 @@ exports.crear = async (req, res) => {
         const autoridad = await Autoridad.create({ cargo, nombre, orden: (ultima?.orden ?? -1) + 1 });
         res.status(201).json(autoridad);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         res.status(400).json({ mensaje: 'Revisá el cargo y el nombre', error: error.message });
     }
 };
@@ -59,6 +62,8 @@ exports.actualizar = async (req, res) => {
         if (!autoridad) return res.status(404).json({ mensaje: 'Autoridad no encontrada' });
         res.json(autoridad);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         res.status(400).json({ mensaje: 'Revisá el cargo y el nombre', error: error.message });
     }
 };

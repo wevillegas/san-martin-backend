@@ -1,4 +1,5 @@
 const Jugador = require('../models/Jugador');
+const { describirError } = require('../utils/errores');
 
 // 1. CREAR (POST) - Con escudo contra duplicados
 // 1. CREAR (POST) - Con validación de triple coincidencia
@@ -34,6 +35,8 @@ exports.crearJugador = async (req, res) => {
             jugador: nuevoJugador
         });
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error('Error al crear jugador:', error);
 
         // Capturamos errores de validación (como el enum de las posiciones)
@@ -97,6 +100,8 @@ exports.actualizarJugador = async (req, res) => {
 
         res.json(jugadorActualizado);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error(error);
         res.status(500).json({ mensaje: 'Error al actualizar el jugador' });
     }

@@ -1,4 +1,5 @@
 const Noticia = require('../models/Noticia');
+const { describirError } = require('../utils/errores');
 const Usuario = require('../models/Usuario');
 
 // Lo que ve el público: sin borrar, sin borradores y sin las programadas para más adelante
@@ -29,6 +30,8 @@ exports.crearNoticia = async (req, res) => {
             noticia: nuevaNoticia
         });
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error('Error al crear noticia:', error);
         res.status(500).json({ mensaje: 'Error al publicar la noticia', error: error.message });
     }
@@ -83,6 +86,8 @@ exports.actualizarNoticia = async (req, res) => {
 
         res.json({ mensaje: 'Noticia actualizada correctamente', noticia: noticiaActualizada });
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error('Error al actualizar noticia:', error);
         res.status(500).json({ mensaje: 'Hubo un error al actualizar', error: error.message });
     }

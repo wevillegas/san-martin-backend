@@ -5,6 +5,8 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+const { describirErrorDeArchivo } = require('./utils/errores');
+
 const app = express();
 
 // ==========================================
@@ -64,7 +66,7 @@ app.get('/', (req, res) => {
 // Manejador de errores de Multer (ej. imagen que supera el límite de tamaño)
 app.use((error, req, res, next) => {
     if (error && error.name === 'MulterError') {
-        return res.status(400).json({ mensaje: 'Error al subir el archivo: ' + error.message });
+        return res.status(400).json({ mensaje: describirErrorDeArchivo(error) });
     }
     next(error);
 });

@@ -1,4 +1,5 @@
 const CuerpoTecnico = require('../models/CuerpoTecnico');
+const { describirError } = require('../utils/errores');
 
 // CREAR
 exports.crearMiembro = async (req, res) => {
@@ -10,6 +11,8 @@ exports.crearMiembro = async (req, res) => {
         await nuevoMiembro.save();
         res.status(201).json(nuevoMiembro);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error(error);
         res.status(500).json({ mensaje: 'Error al crear al miembro del CT' });
     }
@@ -52,6 +55,8 @@ exports.actualizarMiembro = async (req, res) => {
         if (!miembroActualizado) return res.status(404).json({ mensaje: 'Miembro no encontrado' });
         res.json(miembroActualizado);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error(error);
         res.status(500).json({ mensaje: 'Error al actualizar al miembro' });
     }

@@ -1,4 +1,5 @@
 const Producto = require('../models/Producto');
+const { describirError } = require('../utils/errores');
 
 // 1. CREAR (POST) - Con escudo contra duplicados
 exports.crearProducto = async (req, res) => {
@@ -27,6 +28,8 @@ exports.crearProducto = async (req, res) => {
             producto: nuevoProducto
         });
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error('Error al crear producto:', error);
 
         if (error.name === 'ValidationError') {
@@ -87,6 +90,8 @@ exports.actualizarProducto = async (req, res) => {
 
         res.json(productoActualizado);
     } catch (error) {
+        const detalle = describirError(error);
+        if (detalle) return res.status(detalle.status).json({ mensaje: detalle.mensaje });
         console.error(error);
         res.status(500).json({ mensaje: 'Error al actualizar el producto' });
     }
