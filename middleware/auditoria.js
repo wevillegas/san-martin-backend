@@ -4,9 +4,12 @@ const Auditoria = require('../models/Auditoria');
 const Usuario = require('../models/Usuario');
 
 const ACCIONES = { POST: 'crear', PUT: 'editar', PATCH: 'editar', DELETE: 'eliminar' };
-const MODELOS = { jugadores: 'Jugador', noticias: 'Noticia', 'cuerpo-tecnico': 'CuerpoTecnico', productos: 'Producto', usuarios: 'Usuario' };
+const MODELOS = { jugadores: 'Jugador', noticias: 'Noticia', 'cuerpo-tecnico': 'CuerpoTecnico', productos: 'Producto', usuarios: 'Usuario', autoridades: 'Autoridad' };
 
-const nombreDe = (d) => d && (d.titulo || [d.nombre, d.apellido].filter(Boolean).join(' ') || undefined);
+// Acciones que no apuntan a un elemento concreto
+const ETIQUETAS = { me: 'su propia clave', orden: 'orden de la lista', importar: 'lista inicial' };
+
+const nombreDe = (d) => d && (d.titulo || d.nombre && d.cargo && `${d.nombre} (${d.cargo})` || [d.nombre, d.apellido].filter(Boolean).join(' ') || undefined);
 
 // Registra cada alta/edición/baja exitosa hecha con un token válido (se monta antes de las rutas).
 // Nunca guarda el cuerpo de la petición, solo el nombre/título del elemento.
@@ -43,9 +46,8 @@ module.exports = async (req, res, next) => {
         try {
             const usuario = await Usuario.findById(usuarioId, 'nombre email').lean();
             const body = req.body || {};
-            const detalle = entidadId === 'me'
-                ? 'su propia clave'
-                : nombreDe(previo) || nombreDe(body) || (entidad === 'auth' ? body.email : undefined);
+            const detalle = (Object.hasOwn(ETIQUETAS, entidadId) && ETIQUETAS[entidadId])
+                || (entidad === 'club' ? 'cifras del club' : nombreDe(previo) || nombreDe(body) || (entidad === 'auth' ? body.email : undefined));
             await Auditoria.create({
                 usuarioId,
                 usuarioNombre: usuario?.nombre,

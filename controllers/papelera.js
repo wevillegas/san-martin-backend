@@ -3,12 +3,14 @@ const Noticia = require('../models/Noticia');
 const Jugador = require('../models/Jugador');
 const CuerpoTecnico = require('../models/CuerpoTecnico');
 const Producto = require('../models/Producto');
+const Autoridad = require('../models/Autoridad');
 
 const TIPOS = {
     noticias: { modelo: Noticia, titulo: (d) => d.titulo },
     jugadores: { modelo: Jugador, titulo: (d) => `${d.nombre} ${d.apellido}` },
     'cuerpo-tecnico': { modelo: CuerpoTecnico, titulo: (d) => `${d.nombre} ${d.apellido}` },
-    productos: { modelo: Producto, titulo: (d) => d.nombre }
+    productos: { modelo: Producto, titulo: (d) => d.nombre },
+    autoridades: { modelo: Autoridad, titulo: (d) => `${d.nombre} (${d.cargo})` }
 };
 
 // Borra la foto de Cloudinary a partir de su URL (si falla no frena la baja)

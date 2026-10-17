@@ -14,5 +14,7 @@ const auditoriaSchema = new mongoose.Schema({
 });
 
 auditoriaSchema.index({ createdAt: -1 });
+// Los registros de más de un año se borran solos (índice TTL de MongoDB)
+auditoriaSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 365 });
 
 module.exports = mongoose.model('Auditoria', auditoriaSchema);

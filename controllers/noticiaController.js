@@ -1,10 +1,25 @@
 const Noticia = require('../models/Noticia');
+const Usuario = require('../models/Usuario');
+
+// Lo que ve el público: sin borrar, sin borradores y sin las programadas para más adelante
+const visiblesAlPublico = () => ({
+    eliminadoEn: null,
+    estado: { $ne: 'borrador' },
+    $or: [{ publicarEn: null }, { publicarEn: { $lte: new Date() } }]
+});
 
 // 1. CREAR (POST) - Publicar una nueva noticia
 exports.crearNoticia = async (req, res) => {
     try {
         if (req.file) {
             req.body.imagenUrl = req.file.path;
+        }
+
+        // Si no se escribe autor, firma con el nombre del administrador que publica
+        if (!req.body.autor || !req.body.autor.trim()) {
+            const usuario = await Usuario.findById(req.usuario.id, 'nombre').lean();
+            if (usuario) req.body.autor = usuario.nombre;
+            else delete req.body.autor;
         }
 
         const nuevaNoticia = new Noticia(req.body);
@@ -23,7 +38,7 @@ exports.crearNoticia = async (req, res) => {
 exports.obtenerNoticias = async (req, res) => {
     try {
         // LA MAGIA ACÁ: Ordenamos por 'destacado' (descendente: true primero) y luego por 'createdAt' (las más nuevas primero)
-        const noticias = await Noticia.find({ eliminadoEn: null }).sort({ destacado: -1, createdAt: -1 });
+        const noticias = await Noticia.find(req.usuario && req.query.todas === '1' ? { eliminadoEn: null } : visiblesAlPublico()).sort({ destacado: -1, createdAt: -1 });
         res.json(noticias);
     } catch (error) {
         console.error('Error al obtener noticias:', error);
@@ -34,7 +49,7 @@ exports.obtenerNoticias = async (req, res) => {
 // 3. LEER UNA SOLA (GET) - Para cuando el usuario hace clic y entra a leer el artículo
 exports.obtenerNoticiaPorId = async (req, res) => {
     try {
-        const noticia = await Noticia.findOne({ _id: req.params.id, eliminadoEn: null });
+        const noticia = await Noticia.findOne(req.usuario ? { _id: req.params.id, eliminadoEn: null } : { _id: req.params.id, ...visiblesAlPublico() });
 
         if (!noticia) {
             return res.status(404).json({ mensaje: 'Noticia no encontrada' });
@@ -50,6 +65,8 @@ exports.obtenerNoticiaPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - Para editar un error o agregar info a una noticia
 exports.actualizarNoticia = async (req, res) => {
     try {
+        if (typeof req.body.autor === 'string' && !req.body.autor.trim()) delete req.body.autor;
+
         if (req.file) {
             req.body.imagenUrl = req.file.path;
         }

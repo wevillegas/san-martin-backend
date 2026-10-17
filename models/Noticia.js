@@ -28,6 +28,15 @@ const noticiaSchema = new mongoose.Schema({
         enum: ['Primera Nacional', 'Institucional', 'Liga Tucumana', 'Femenino', 'Socios', 'Primer Equipo', 'Juveniles'],
         default: 'Primera Nacional'
     },
+    estado: {
+        type: String,
+        enum: ['borrador', 'publicada'],
+        default: 'publicada'
+    },
+    publicarEn: {
+        type: Date,
+        default: null // null = se muestra apenas se publica; con fecha futura queda programada
+    },
     destacado: {
         type: Boolean,
         default: false // Por defecto, una noticia nueva no es destacada

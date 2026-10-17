@@ -52,6 +52,9 @@ app.use('/api/fixture', require('./routes/fixtureRoutes'));
 app.use('/api/auditoria', require('./routes/auditoriaRoutes'));
 app.use('/api/usuarios', require('./routes/usuarioRoutes'));
 app.use('/api/papelera', require('./routes/papelera'));
+app.use('/api/autoridades', require('./routes/autoridadRoutes'));
+app.use('/api/club', require('./routes/clubRoutes'));
+app.use('/api/dashboard', require('./routes/dashboardRoutes'));
 
 // Ruta de cortesía para verificación de estado
 app.get('/', (req, res) => {
