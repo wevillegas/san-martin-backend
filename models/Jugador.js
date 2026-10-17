@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const JugadorSchema = new mongoose.Schema({
+    eliminadoEn: { type: Date, default: null }, // papelera: fecha de baja (null = visible)
     nombre: { type: String, required: true },
     apellido: { type: String, required: true },
     numeroCamiseta: { type: Number, required: true },

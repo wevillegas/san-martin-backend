@@ -6,7 +6,7 @@ exports.crearProducto = async (req, res) => {
         const { nombre } = req.body;
 
         // Buscamos si ya existe un producto con el mismo nombre
-        const productoExistente = await Producto.findOne({ nombre: String(nombre) });
+        const productoExistente = await Producto.findOne({ nombre: String(nombre), eliminadoEn: null });
 
         if (productoExistente) {
             return res.status(400).json({
@@ -45,7 +45,7 @@ exports.crearProducto = async (req, res) => {
 // 2. LEER TODOS (GET)
 exports.obtenerProductos = async (req, res) => {
     try {
-        const productos = await Producto.find().sort({ createdAt: -1 }); 
+        const productos = await Producto.find({ eliminadoEn: null }).sort({ createdAt: -1 }); 
         res.json(productos);
     } catch (error) {
         console.error('Error al obtener productos:', error);
@@ -56,7 +56,7 @@ exports.obtenerProductos = async (req, res) => {
 // 3. LEER UNO SOLO (GET)
 exports.obtenerProductoPorId = async (req, res) => {
     try {
-        const producto = await Producto.findById(req.params.id);
+        const producto = await Producto.findOne({ _id: req.params.id, eliminadoEn: null });
         if (!producto) {
             return res.status(404).json({ mensaje: 'Producto no encontrado' });
         }
@@ -95,7 +95,7 @@ exports.actualizarProducto = async (req, res) => {
 // 5. ELIMINAR (DELETE)
 exports.eliminarProducto = async (req, res) => {
     try {
-        const productoEliminado = await Producto.findByIdAndDelete(req.params.id);
+        const productoEliminado = await Producto.findOneAndUpdate({ _id: req.params.id, eliminadoEn: null }, { eliminadoEn: new Date() });
         if (!productoEliminado) {
             return res.status(404).json({ mensaje: 'Producto no encontrado para eliminar' });
         }

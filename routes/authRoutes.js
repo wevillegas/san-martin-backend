@@ -19,4 +19,7 @@ router.post('/register', authMiddleware, authController.registrarUsuario);
 // Ruta para Iniciar Sesión (POST) -> /api/auth/login
 router.post('/login', loginLimiter, authController.loginUsuario);
 
+// Ruta para renovar la sesión (POST) -> /api/auth/renovar
+router.post('/renovar', authMiddleware, authController.renovarToken);
+
 module.exports = router;

@@ -23,7 +23,7 @@ exports.crearNoticia = async (req, res) => {
 exports.obtenerNoticias = async (req, res) => {
     try {
         // LA MAGIA ACÁ: Ordenamos por 'destacado' (descendente: true primero) y luego por 'createdAt' (las más nuevas primero)
-        const noticias = await Noticia.find().sort({ destacado: -1, createdAt: -1 });
+        const noticias = await Noticia.find({ eliminadoEn: null }).sort({ destacado: -1, createdAt: -1 });
         res.json(noticias);
     } catch (error) {
         console.error('Error al obtener noticias:', error);
@@ -34,7 +34,7 @@ exports.obtenerNoticias = async (req, res) => {
 // 3. LEER UNA SOLA (GET) - Para cuando el usuario hace clic y entra a leer el artículo
 exports.obtenerNoticiaPorId = async (req, res) => {
     try {
-        const noticia = await Noticia.findById(req.params.id);
+        const noticia = await Noticia.findOne({ _id: req.params.id, eliminadoEn: null });
 
         if (!noticia) {
             return res.status(404).json({ mensaje: 'Noticia no encontrada' });
@@ -74,7 +74,7 @@ exports.actualizarNoticia = async (req, res) => {
 // 5. ELIMINAR (DELETE) - Para dar de baja un artículo
 exports.eliminarNoticia = async (req, res) => {
     try {
-        const noticiaEliminada = await Noticia.findByIdAndDelete(req.params.id);
+        const noticiaEliminada = await Noticia.findOneAndUpdate({ _id: req.params.id, eliminadoEn: null }, { eliminadoEn: new Date() });
 
         if (!noticiaEliminada) {
             return res.status(404).json({ mensaje: 'Noticia no encontrada para eliminar' });
