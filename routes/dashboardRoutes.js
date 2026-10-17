@@ -27,7 +27,7 @@ router.get('/', auth, async (req, res) => {
             Promise.all([Noticia, Jugador, CuerpoTecnico, Producto, Autoridad].map((m) => m.countDocuments(enPapelera))).then((n) => n.reduce((a, b) => a + b, 0)),
             Auditoria.find({ accion: { $ne: 'login' } }).sort({ createdAt: -1 }).limit(6).lean()
         ]);
-        res.json({ noticias, borradores, programadas, jugadores, cuerpoTecnico, productos, autoridades, usuarios, papelera, actividad });
+        res.json({ noticias, borradores, programadas, jugadores, cuerpoTecnico, productos, autoridades, usuarios, papelera, actividad: req.usuario.rol === 'administrador' ? actividad : [] });
     } catch (error) {
         console.error('Error en el dashboard:', error);
         res.status(500).json({ mensaje: 'Error al obtener los datos del panel' });

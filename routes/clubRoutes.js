@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Club = require('../models/Club');
 const auth = require('../middleware/authMiddleware');
+const soloAdmin = require('../middleware/rol')('administrador');
+
 
 const CAMPOS = ['capacidadCiudadela', 'cantidadSocios', 'copasNacionales'];
 const aCifras = (doc) => Object.fromEntries(CAMPOS.map((c) => [c, doc[c]]));
@@ -17,7 +19,7 @@ router.get('/', async (req, res) => {
 });
 
 // PUT /api/club -> solo administradores
-router.put('/', auth, async (req, res) => {
+router.put('/', auth, soloAdmin, async (req, res) => {
     try {
         const cambios = {};
         for (const campo of CAMPOS) {

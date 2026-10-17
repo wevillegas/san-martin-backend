@@ -1,33 +1,45 @@
 const jwt = require('jsonwebtoken');
+const Usuario = require('../models/Usuario');
 
-module.exports = function (req, res, next) {
-    // 1. Leer el token que viene en la cabecera (Header) de la petición
+// Devuelve { id, rol } si el token es válido Y la cuenta sigue existiendo Y no cambió su clave después de emitirlo.
+// El rol se lee siempre de la base de datos (nunca del token), así una baja o un cambio de rol rigen al instante.
+// Devuelve { error } con el motivo si no es válido.
+const verificar = async (token) => {
+    let cifrado;
+    try {
+        cifrado = jwt.verify(token, process.env.JWT_SECRET);
+    } catch {
+        return { error: 'Token no válido o expirado' };
+    }
+
+    const usuario = await Usuario.findById(cifrado.usuario?.id, 'rol claveCambiadaEn').lean();
+    if (!usuario) return { error: 'La cuenta ya no existe' };
+    if (usuario.claveCambiadaEn && cifrado.iat < Math.floor(usuario.claveCambiadaEn.getTime() / 1000)) {
+        return { error: 'La clave cambió: iniciá sesión de nuevo' };
+    }
+    return { usuario: { id: String(usuario._id), rol: usuario.rol || 'administrador' } };
+};
+
+module.exports = async function (req, res, next) {
     const authHeader = req.header('Authorization');
-
-    // 2. Si no mandó nada, lo rebotamos
     if (!authHeader) {
         return res.status(401).json({ mensaje: 'No hay token, permiso denegado' });
     }
 
+    // Los tokens se envían como "Bearer <token>"
+    const token = authHeader.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ mensaje: 'Formato de token inválido' });
+    }
+
     try {
-        // Los tokens suelen enviarse con la palabra "Bearer " adelante.
-        // Ejemplo: "Bearer eyJhbGciOi..."
-        // Usamos split para separar la palabra Bearer del código y quedarnos solo con el código (posición 1)
-        const token = authHeader.split(' ')[1];
-
-        if (!token) {
-            return res.status(401).json({ mensaje: 'Formato de token inválido' });
-        }
-
-        // 3. Verificamos que el token sea auténtico usando nuestra palabra secreta
-        const cifrado = jwt.verify(token, process.env.JWT_SECRET);
-
-        // 4. Si es válido, guardamos los datos del usuario en la petición (req) y le decimos "pasá" (next)
-        req.usuario = cifrado.usuario;
-        next(); // Esto hace que el código siga hacia el Controlador
-
+        const { usuario, error } = await verificar(token);
+        if (error) return res.status(401).json({ mensaje: error });
+        req.usuario = usuario;
+        next();
     } catch (error) {
-        // Si el token expiró o alguien inventó uno falso
-        res.status(401).json({ mensaje: 'Token no válido o expirado' });
+        next(error); // falla de la base de datos: no es culpa del token, no se cierra la sesión
     }
 };
+
+module.exports.verificar = verificar;

@@ -3,6 +3,8 @@ const rateLimit = require('express-rate-limit');
 const router = express.Router();
 const authController = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
+const soloAdmin = require('../middleware/rol')('administrador');
+
 
 // Limita los intentos de login para frenar fuerza bruta de contraseña
 const loginLimiter = rateLimit({
@@ -14,7 +16,7 @@ const loginLimiter = rateLimit({
 
 // Ruta para Registrar (POST) -> /api/auth/register
 // Protegida: solo un admin ya logueado puede crear otro admin
-router.post('/register', authMiddleware, authController.registrarUsuario);
+router.post('/register', authMiddleware, soloAdmin, authController.registrarUsuario);
 
 // Ruta para Iniciar Sesión (POST) -> /api/auth/login
 router.post('/login', loginLimiter, authController.loginUsuario);

@@ -7,7 +7,7 @@ const ACCIONES = { POST: 'crear', PUT: 'editar', PATCH: 'editar', DELETE: 'elimi
 const MODELOS = { jugadores: 'Jugador', noticias: 'Noticia', 'cuerpo-tecnico': 'CuerpoTecnico', productos: 'Producto', usuarios: 'Usuario', autoridades: 'Autoridad' };
 
 // Acciones que no apuntan a un elemento concreto
-const ETIQUETAS = { me: 'su propia clave', orden: 'orden de la lista', importar: 'lista inicial' };
+const ETIQUETAS = { me: 'su propia clave', rol: 'cambio de rol', orden: 'orden de la lista', importar: 'lista inicial' };
 
 const nombreDe = (d) => d && (d.titulo || d.nombre && d.cargo && `${d.nombre} (${d.cargo})` || [d.nombre, d.apellido].filter(Boolean).join(' ') || undefined);
 

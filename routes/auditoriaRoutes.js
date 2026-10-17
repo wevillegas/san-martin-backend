@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Auditoria = require('../models/Auditoria');
 const auth = require('../middleware/authMiddleware');
+const soloAdmin = require('../middleware/rol')('administrador');
+
 
 // Arma el filtro a partir de ?entidad=&accion=&usuario=&desde=&hasta= (fechas AAAA-MM-DD)
 const construirFiltro = (query) => {
@@ -20,7 +22,7 @@ const construirFiltro = (query) => {
 };
 
 // GET /api/auditoria?pagina=1  (solo administradores logueados)
-router.get('/', auth, async (req, res) => {
+router.get('/', auth, soloAdmin, async (req, res) => {
     try {
         const filtro = construirFiltro(req.query);
         const limite = 30;
@@ -47,7 +49,7 @@ const celda = (valor) => {
 };
 
 // GET /api/auditoria/exportar -> mismo filtro, hasta 5.000 registros, listo para abrir en Excel
-router.get('/exportar', auth, async (req, res) => {
+router.get('/exportar', auth, soloAdmin, async (req, res) => {
     try {
         const registros = await Auditoria.find(construirFiltro(req.query)).sort({ createdAt: -1 }).limit(5000).lean();
         const filas = [['Fecha', 'Usuario', 'Correo', 'Acción', 'Sección', 'Elemento']];

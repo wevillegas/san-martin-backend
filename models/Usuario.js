@@ -17,6 +17,17 @@ const usuarioSchema = new mongoose.Schema({
     password: {
         type: String,
         required: [true, 'La contraseña es obligatoria']
+    },
+    // administrador: todo. editor: crea y edita contenido, pero no elimina ni administra (las cuentas anteriores quedan como administrador)
+    rol: {
+        type: String,
+        enum: ['administrador', 'editor'],
+        default: 'administrador'
+    },
+    // Los tokens emitidos antes de esta fecha dejan de valer (cierra las sesiones al cambiar la clave)
+    claveCambiadaEn: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
