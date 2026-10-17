@@ -18,7 +18,7 @@ exports.crearMiembro = async (req, res) => {
 // LEER TODOS
 exports.obtenerCuerpoTecnico = async (req, res) => {
     try {
-        const ct = await CuerpoTecnico.find();
+        const ct = await CuerpoTecnico.find({ eliminadoEn: null });
         res.json(ct);
     } catch (error) {
         console.error(error);
@@ -29,7 +29,7 @@ exports.obtenerCuerpoTecnico = async (req, res) => {
 // LEER UNO
 exports.obtenerMiembroPorId = async (req, res) => {
     try {
-        const miembro = await CuerpoTecnico.findById(req.params.id);
+        const miembro = await CuerpoTecnico.findOne({ _id: req.params.id, eliminadoEn: null });
         if (!miembro) return res.status(404).json({ mensaje: 'Miembro no encontrado' });
         res.json(miembro);
     } catch (error) {
@@ -60,7 +60,7 @@ exports.actualizarMiembro = async (req, res) => {
 // ELIMINAR
 exports.eliminarMiembro = async (req, res) => {
     try {
-        const miembroEliminado = await CuerpoTecnico.findByIdAndDelete(req.params.id);
+        const miembroEliminado = await CuerpoTecnico.findOneAndUpdate({ _id: req.params.id, eliminadoEn: null }, { eliminadoEn: new Date() });
         if (!miembroEliminado) return res.status(404).json({ mensaje: 'Miembro no encontrado' });
         res.json({ mensaje: 'Miembro eliminado correctamente' });
     } catch (error) {

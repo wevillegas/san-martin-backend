@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const cuerpoTecnicoSchema = new mongoose.Schema({
+    eliminadoEn: { type: Date, default: null }, // papelera: fecha de baja (null = visible)
     nombre: { 
         type: String, 
         required: [true, 'El nombre es obligatorio'],

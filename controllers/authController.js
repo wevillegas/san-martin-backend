@@ -8,6 +8,13 @@ exports.registrarUsuario = async (req, res) => {
     try {
         const { nombre, email, password } = req.body;
 
+        if (typeof nombre !== 'string' || !nombre.trim() || typeof email !== 'string' || !/^\S+@\S+\.\S+$/.test(email)) {
+            return res.status(400).json({ mensaje: 'Nombre o correo inválido' });
+        }
+        if (typeof password !== 'string' || password.length < 8) {
+            return res.status(400).json({ mensaje: 'La clave debe tener al menos 8 caracteres' });
+        }
+
         // Verificamos si el correo ya existe en la base de datos
         let usuarioExiste = await Usuario.findOne({ email });
         if (usuarioExiste) {
@@ -67,5 +74,21 @@ exports.loginUsuario = async (req, res) => {
     } catch (error) {
         console.error('Error en login:', error);
         res.status(500).json({ mensaje: 'Error al iniciar sesión' });
+    }
+};
+
+// 3. RENOVAR la sesión (POST /api/auth/renovar): un token vigente a cambio de uno nuevo, si el usuario sigue existiendo
+exports.renovarToken = async (req, res) => {
+    try {
+        const usuario = await Usuario.findById(req.usuario.id, '_id');
+        if (!usuario) return res.status(401).json({ mensaje: 'La cuenta ya no existe' });
+
+        jwt.sign({ usuario: { id: usuario._id } }, process.env.JWT_SECRET, { expiresIn: '1h' }, (error, token) => {
+            if (error) return res.status(500).json({ mensaje: 'No se pudo renovar la sesión' });
+            res.json({ token });
+        });
+    } catch (error) {
+        console.error('Error al renovar sesión:', error);
+        res.status(500).json({ mensaje: 'Error al renovar la sesión' });
     }
 };

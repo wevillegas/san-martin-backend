@@ -10,7 +10,8 @@ exports.crearJugador = async (req, res) => {
         const jugadorIdentico = await Jugador.findOne({
             nombre: String(nombre),
             apellido: String(apellido),
-            numeroCamiseta: Number(numeroCamiseta)
+            numeroCamiseta: Number(numeroCamiseta),
+            eliminadoEn: null
         });
 
         if (jugadorIdentico) {
@@ -52,7 +53,7 @@ exports.crearJugador = async (req, res) => {
 // 2. LEER TODOS (GET) - Sin cambios, está perfecto
 exports.obtenerJugadores = async (req, res) => {
     try {
-        const jugadores = await Jugador.find().sort({ numeroCamiseta: 1 }); // Opcional: los trae ordenados por dorsal
+        const jugadores = await Jugador.find({ eliminadoEn: null }).sort({ numeroCamiseta: 1 }); // Opcional: los trae ordenados por dorsal
         res.json(jugadores);
     } catch (error) {
         console.error('Error al obtener jugadores:', error);
@@ -63,7 +64,7 @@ exports.obtenerJugadores = async (req, res) => {
 // 3. LEER UNO SOLO (GET) - Sin cambios, está perfecto
 exports.obtenerJugadorPorId = async (req, res) => {
     try {
-        const jugador = await Jugador.findById(req.params.id);
+        const jugador = await Jugador.findOne({ _id: req.params.id, eliminadoEn: null });
         if (!jugador) {
             return res.status(404).json({ mensaje: 'Jugador no encontrado' });
         }
@@ -104,7 +105,7 @@ exports.actualizarJugador = async (req, res) => {
 // 5. ELIMINAR (DELETE) - Sin cambios, está perfecto
 exports.eliminarJugador = async (req, res) => {
     try {
-        const jugadorEliminado = await Jugador.findByIdAndDelete(req.params.id);
+        const jugadorEliminado = await Jugador.findOneAndUpdate({ _id: req.params.id, eliminadoEn: null }, { eliminadoEn: new Date() });
         if (!jugadorEliminado) {
             return res.status(404).json({ mensaje: 'Jugador no encontrado para eliminar' });
         }

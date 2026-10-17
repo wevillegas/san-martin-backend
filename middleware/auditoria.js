@@ -4,15 +4,15 @@ const Auditoria = require('../models/Auditoria');
 const Usuario = require('../models/Usuario');
 
 const ACCIONES = { POST: 'crear', PUT: 'editar', PATCH: 'editar', DELETE: 'eliminar' };
-const MODELOS = { jugadores: 'Jugador', noticias: 'Noticia', 'cuerpo-tecnico': 'CuerpoTecnico', productos: 'Producto' };
+const MODELOS = { jugadores: 'Jugador', noticias: 'Noticia', 'cuerpo-tecnico': 'CuerpoTecnico', productos: 'Producto', usuarios: 'Usuario' };
 
 const nombreDe = (d) => d && (d.titulo || [d.nombre, d.apellido].filter(Boolean).join(' ') || undefined);
 
 // Registra cada alta/edición/baja exitosa hecha con un token válido (se monta antes de las rutas).
 // Nunca guarda el cuerpo de la petición, solo el nombre/título del elemento.
 module.exports = async (req, res, next) => {
-    const accion = ACCIONES[req.method];
-    if (!accion) return next();
+    let accion = ACCIONES[req.method];
+    if (!accion || req.originalUrl.startsWith('/api/auth/renovar')) return next(); // renovar la sesión no es una acción a auditar
 
     let usuarioId;
     try {
@@ -21,8 +21,15 @@ module.exports = async (req, res, next) => {
         return next(); // sin token válido las rutas protegidas la rechazan solas
     }
 
-    // /api/<entidad>/<id>
-    const [, , entidad, entidadId] = req.originalUrl.split('?')[0].split('/');
+    // /api/<entidad>/<id>  (la papelera es /api/papelera/<tipo>/<id>[/restaurar])
+    let [, , entidad, entidadId, tercero] = req.originalUrl.split('?')[0].split('/');
+    let sufijo = '';
+    if (entidad === 'papelera') {
+        entidad = entidadId;
+        entidadId = tercero;
+        if (req.method === 'POST') accion = 'restaurar';
+        else sufijo = ' (definitivo)';
+    }
 
     let previo = null;
     if (entidadId && MODELOS[entidad]) {
@@ -36,6 +43,9 @@ module.exports = async (req, res, next) => {
         try {
             const usuario = await Usuario.findById(usuarioId, 'nombre email').lean();
             const body = req.body || {};
+            const detalle = entidadId === 'me'
+                ? 'su propia clave'
+                : nombreDe(previo) || nombreDe(body) || (entidad === 'auth' ? body.email : undefined);
             await Auditoria.create({
                 usuarioId,
                 usuarioNombre: usuario?.nombre,
@@ -43,7 +53,7 @@ module.exports = async (req, res, next) => {
                 accion,
                 entidad,
                 entidadId,
-                detalle: nombreDe(previo) || nombreDe(body) || (entidad === 'auth' ? body.email : undefined)
+                detalle: detalle ? detalle + sufijo : undefined
             });
         } catch (error) {
             console.error('No se pudo registrar la auditoría:', error.message);

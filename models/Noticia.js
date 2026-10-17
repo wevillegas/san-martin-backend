@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const noticiaSchema = new mongoose.Schema({
+    eliminadoEn: { type: Date, default: null }, // papelera: fecha de baja (null = visible)
     titulo: {
         type: String,
         required: [true, 'El título de la noticia es obligatorio'],

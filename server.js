@@ -50,6 +50,8 @@ app.use('/api/cuerpo-tecnico', require('./routes/cuerpoTecnicoRoutes'));
 app.use('/api/productos', require('./routes/productoRoutes'));
 app.use('/api/fixture', require('./routes/fixtureRoutes'));
 app.use('/api/auditoria', require('./routes/auditoriaRoutes'));
+app.use('/api/usuarios', require('./routes/usuarioRoutes'));
+app.use('/api/papelera', require('./routes/papelera'));
 
 // Ruta de cortesía para verificación de estado
 app.get('/', (req, res) => {
