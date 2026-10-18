@@ -21,6 +21,7 @@ const visiblesAlPublico = () => ({
 // 1. CREAR (POST) - Publicar una nueva noticia
 exports.crearNoticia = async (req, res) => {
     try {
+        if (req.usuario.rol === 'editor') delete req.body.destacado; // elegir las destacadas es cosa del administrador
         if (esVerdadero(req.body.destacado) && (await destacadasActuales()) >= MAX_DESTACADAS) {
             if (req.file) await cloudinary.uploader.destroy(req.file.filename).catch(() => {}); // no dejar la foto huérfana
             return res.status(409).json({ mensaje: MENSAJE_TOPE });
@@ -83,6 +84,7 @@ exports.obtenerNoticiaPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - Para editar un error o agregar info a una noticia
 exports.actualizarNoticia = async (req, res) => {
     try {
+        if (req.usuario.rol === 'editor') delete req.body.destacado;
         // La firma del editor no se toca; en el administrador, vacía = no cambia
         if (req.usuario.rol === 'editor' || (typeof req.body.autor === 'string' && !req.body.autor.trim())) delete req.body.autor;
 
