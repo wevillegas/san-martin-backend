@@ -4,6 +4,7 @@ const Jugador = require('../models/Jugador');
 const CuerpoTecnico = require('../models/CuerpoTecnico');
 const Producto = require('../models/Producto');
 const Autoridad = require('../models/Autoridad');
+const { MAX_DESTACADAS } = require('../utils/limites');
 
 const TIPOS = {
     noticias: { modelo: Noticia, titulo: (d) => d.titulo },
@@ -45,9 +46,21 @@ exports.restaurar = async (req, res) => {
     try {
         const tipo = TIPOS[req.params.tipo];
         if (!tipo) return res.status(404).json({ mensaje: 'Tipo desconocido' });
-        const doc = await tipo.modelo.findOneAndUpdate({ _id: req.params.id, eliminadoEn: { $ne: null } }, { eliminadoEn: null });
+        const doc = await tipo.modelo.findOne({ _id: req.params.id, eliminadoEn: { $ne: null } });
         if (!doc) return res.status(404).json({ mensaje: 'No está en la papelera' });
-        res.json({ mensaje: 'Restaurado correctamente' });
+
+        const cambios = { eliminadoEn: null };
+        let sinEstrella = false;
+        if (req.params.tipo === 'noticias' && doc.destacado && (await tipo.modelo.countDocuments({ eliminadoEn: null, destacado: true })) >= MAX_DESTACADAS) {
+            cambios.destacado = false; // ya hay 5 destacadas: vuelve como una noticia común
+            sinEstrella = true;
+        }
+        await tipo.modelo.updateOne({ _id: doc._id }, cambios);
+        res.json({
+            mensaje: sinEstrella
+                ? `Restaurado. Como ya hay ${MAX_DESTACADAS} noticias destacadas, volvió sin la estrella.`
+                : 'Restaurado correctamente'
+        });
     } catch (error) {
         console.error('Error al restaurar:', error);
         res.status(400).json({ mensaje: 'No se pudo restaurar' });
