@@ -4,7 +4,8 @@ const { describirError } = require('../utils/errores');
 // GET /api/autoridades (público) -> en el orden definido en el panel
 exports.obtener = async (req, res) => {
     try {
-        res.json(await Autoridad.find({ eliminadoEn: null }).sort({ orden: 1, createdAt: 1 }));
+        const consulta = Autoridad.find({ eliminadoEn: null }).sort({ orden: 1, createdAt: 1 });
+        res.json(await (req.usuario ? consulta.populate('creadoPor', 'nombre') : consulta));
     } catch (error) {
         console.error('Error al obtener autoridades:', error);
         res.status(500).json({ mensaje: 'Error al obtener las autoridades' });
@@ -16,7 +17,7 @@ exports.crear = async (req, res) => {
     try {
         const { cargo, nombre } = req.body;
         const ultima = await Autoridad.findOne({ eliminadoEn: null }).sort({ orden: -1 }).lean();
-        const autoridad = await Autoridad.create({ cargo, nombre, orden: (ultima?.orden ?? -1) + 1 });
+        const autoridad = await Autoridad.create({ cargo, nombre, creadoPor: req.usuario.id, orden: (ultima?.orden ?? -1) + 1 });
         res.status(201).json(autoridad);
     } catch (error) {
         const detalle = describirError(error);

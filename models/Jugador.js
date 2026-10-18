@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const JugadorSchema = new mongoose.Schema({
     eliminadoEn: { type: Date, default: null }, // papelera: fecha de baja (null = visible)
+    creadoPor: { type: mongoose.Schema.Types.ObjectId, ref: 'Usuario', default: null }, // quién lo creó (los editores solo tocan lo suyo)
     nombre: { type: String, required: true },
     apellido: { type: String, required: true },
     numeroCamiseta: { type: Number, required: true },

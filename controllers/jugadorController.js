@@ -27,7 +27,7 @@ exports.crearJugador = async (req, res) => {
         }
 
         // Si no existe esa combinación exacta, lo creamos
-        const nuevoJugador = new Jugador(req.body);
+        const nuevoJugador = new Jugador({ ...req.body, creadoPor: req.usuario.id });
         await nuevoJugador.save();
 
         res.status(201).json({
@@ -56,7 +56,8 @@ exports.crearJugador = async (req, res) => {
 // 2. LEER TODOS (GET) - Sin cambios, está perfecto
 exports.obtenerJugadores = async (req, res) => {
     try {
-        const jugadores = await Jugador.find({ eliminadoEn: null }).sort({ numeroCamiseta: 1 }); // Opcional: los trae ordenados por dorsal
+        const consulta = Jugador.find({ eliminadoEn: null }).sort({ numeroCamiseta: 1 });
+        const jugadores = await (req.usuario ? consulta.populate('creadoPor', 'nombre') : consulta); // Opcional: los trae ordenados por dorsal
         res.json(jugadores);
     } catch (error) {
         console.error('Error al obtener jugadores:', error);

@@ -25,7 +25,7 @@ const construirFiltro = (query) => {
 router.get('/', auth, soloAdmin, async (req, res) => {
     try {
         const filtro = construirFiltro(req.query);
-        const limite = 30;
+        const limite = Math.min(Math.max(parseInt(req.query.limite) || 30, 1), 50);
         const pagina = Math.max(1, parseInt(req.query.pagina) || 1);
 
         const [registros, total, usuarios] = await Promise.all([

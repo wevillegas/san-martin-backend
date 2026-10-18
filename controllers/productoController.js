@@ -20,7 +20,7 @@ exports.crearProducto = async (req, res) => {
             req.body.imagenUrl = req.file.path;
         }
 
-        const nuevoProducto = new Producto(req.body);
+        const nuevoProducto = new Producto({ ...req.body, creadoPor: req.usuario.id });
         await nuevoProducto.save();
 
         res.status(201).json({
@@ -48,7 +48,8 @@ exports.crearProducto = async (req, res) => {
 // 2. LEER TODOS (GET)
 exports.obtenerProductos = async (req, res) => {
     try {
-        const productos = await Producto.find({ eliminadoEn: null }).sort({ createdAt: -1 }); 
+        const consulta = Producto.find({ eliminadoEn: null }).sort({ createdAt: -1 });
+        const productos = await (req.usuario ? consulta.populate('creadoPor', 'nombre') : consulta);
         res.json(productos);
     } catch (error) {
         console.error('Error al obtener productos:', error);

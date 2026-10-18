@@ -30,14 +30,14 @@ exports.crearNoticia = async (req, res) => {
             req.body.imagenUrl = req.file.path;
         }
 
-        // Si no se escribe autor, firma con el nombre del administrador que publica
-        if (!req.body.autor || !req.body.autor.trim()) {
+        // El editor siempre firma con su nombre; el administrador puede poner otra firma (si la deja vacía, usa la suya)
+        if (req.usuario.rol === 'editor' || !req.body.autor || !req.body.autor.trim()) {
             const usuario = await Usuario.findById(req.usuario.id, 'nombre').lean();
             if (usuario) req.body.autor = usuario.nombre;
             else delete req.body.autor;
         }
 
-        const nuevaNoticia = new Noticia(req.body);
+        const nuevaNoticia = new Noticia({ ...req.body, creadoPor: req.usuario.id });
         await nuevaNoticia.save();
         res.status(201).json({
             mensaje: '¡Noticia publicada con éxito!',
@@ -55,7 +55,8 @@ exports.crearNoticia = async (req, res) => {
 exports.obtenerNoticias = async (req, res) => {
     try {
         // LA MAGIA ACÁ: Ordenamos por 'destacado' (descendente: true primero) y luego por 'createdAt' (las más nuevas primero)
-        const noticias = await Noticia.find(req.usuario && req.query.todas === '1' ? { eliminadoEn: null } : visiblesAlPublico()).sort({ destacado: -1, createdAt: -1 });
+        const consulta = Noticia.find(req.usuario && req.query.todas === '1' ? { eliminadoEn: null } : visiblesAlPublico()).sort({ destacado: -1, createdAt: -1 });
+        const noticias = await (req.usuario ? consulta.populate('creadoPor', 'nombre') : consulta);
         res.json(noticias);
     } catch (error) {
         console.error('Error al obtener noticias:', error);
@@ -82,7 +83,8 @@ exports.obtenerNoticiaPorId = async (req, res) => {
 // 4. ACTUALIZAR (PUT) - Para editar un error o agregar info a una noticia
 exports.actualizarNoticia = async (req, res) => {
     try {
-        if (typeof req.body.autor === 'string' && !req.body.autor.trim()) delete req.body.autor;
+        // La firma del editor no se toca; en el administrador, vacía = no cambia
+        if (req.usuario.rol === 'editor' || (typeof req.body.autor === 'string' && !req.body.autor.trim())) delete req.body.autor;
 
         if (esVerdadero(req.body.destacado)) {
             const actual = await Noticia.findOne({ _id: req.params.id, eliminadoEn: null }, 'destacado').lean();

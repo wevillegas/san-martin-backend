@@ -7,7 +7,7 @@ exports.crearMiembro = async (req, res) => {
         if (req.file) {
             req.body.imagenUrl = req.file.path;
         }
-        const nuevoMiembro = new CuerpoTecnico(req.body);
+        const nuevoMiembro = new CuerpoTecnico({ ...req.body, creadoPor: req.usuario.id });
         await nuevoMiembro.save();
         res.status(201).json(nuevoMiembro);
     } catch (error) {
@@ -21,7 +21,8 @@ exports.crearMiembro = async (req, res) => {
 // LEER TODOS
 exports.obtenerCuerpoTecnico = async (req, res) => {
     try {
-        const ct = await CuerpoTecnico.find({ eliminadoEn: null });
+        const consulta = CuerpoTecnico.find({ eliminadoEn: null });
+        const ct = await (req.usuario ? consulta.populate('creadoPor', 'nombre') : consulta);
         res.json(ct);
     } catch (error) {
         console.error(error);

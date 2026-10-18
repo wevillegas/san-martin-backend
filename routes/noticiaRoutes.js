@@ -1,19 +1,21 @@
 const express = require('express');
 const router = express.Router();
+const propio = require('../middleware/propio');
+const ocultarCreador = require('../middleware/ocultarCreador');
+const Noticia = require('../models/Noticia');
 const noticiaController = require('../controllers/noticiaController');
 const auth = require('../middleware/authMiddleware'); // <-- IMPORTAMOS EL GUARDIA
 const upload = require('../config/cloudinary');
-const soloAdmin = require('../middleware/rol')('administrador');
 const camposProtegidos = require('../middleware/camposProtegidos');
 const authOpcional = require('../middleware/authOpcional'); // deja ver borradores a los administradores // <-- IMPORTAMOS EL PORTERO DE IMÁGENES
 
 // Rutas Públicas
-router.get('/', authOpcional, noticiaController.obtenerNoticias);
-router.get('/:id', authOpcional, noticiaController.obtenerNoticiaPorId);
+router.get('/', authOpcional, ocultarCreador, noticiaController.obtenerNoticias);
+router.get('/:id', authOpcional, ocultarCreador, noticiaController.obtenerNoticiaPorId);
 
 // Rutas Privadas
 router.post('/', auth, upload.single('imagen'), camposProtegidos, noticiaController.crearNoticia);
-router.put('/:id', auth, upload.single('imagen'), camposProtegidos, noticiaController.actualizarNoticia);
-router.delete('/:id', auth, soloAdmin, noticiaController.eliminarNoticia);
+router.put('/:id', auth, propio(Noticia), upload.single('imagen'), camposProtegidos, noticiaController.actualizarNoticia);
+router.delete('/:id', auth, propio(Noticia), noticiaController.eliminarNoticia);
 
 module.exports = router;
